@@ -1,0 +1,52 @@
+
+Attempt to log start and exit information of execution of dynamically
+loadable binary executables.
+
+This is done by adding init and fini functions, and some wrapper functions
+to LD_PRELOADable file.
+
+There are wrapper functions for fork, execve and wait* functions.
+
+This catches what it catches; there may be other interesting syscalls
+this is not wrapping; some libraries may do calls that are not catchable
+by the LD_PRELOAD code this is implementing and finally -- the execve'd
+process may not use dynamic loader at all (being "statically" linked).
+
+Anyway, one may find this useful. Try it.
+
+To compile the code, enter:
+
+  sh ldpreload-log-dlproc-life.c 973
+
+973 is an fd which will be used by the code to log information.
+
+To try it, execute:
+
+  ./log-dlproc-life-973.bash logpfx '.' env env env true
+
+And then execute
+
+  ${PAGER:-less} logpfx.js0n
+
+to examine what got logged.
+
+--
+
+Currently subdirectory ./more/ has the following files:
+
+- more/log-dlproc-life-973.pl
+  - to do the same as log-dlproc-life-973.bash, using fd 973
+    - other shells (I tried) are not capable of redirecting fd's over 9
+
+- more/minenv.sh
+  - wrapper to execute commandline with "minimal" environment variables
+    - does not change content of those.. but check in the script for more info
+
+- more/sctime.c
+  - prints some approximation of the overhead this wrapper uses
+    - in my tries on one system showed took 1-2 microsecond for a syscall
+    - functions that are not syscalls time was <~100 nanoseconds
+  - if floating point accuracy is 10 microsecond in values of >1_000_000_000
+    then overhead is so large that the accuracy is good enough
+  - compile by executing sh more/sctime.c (writes ./sctime)
+.
