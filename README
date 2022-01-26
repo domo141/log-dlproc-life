@@ -32,6 +32,17 @@ to examine what got logged.
 
 --
 
+Simplest way to "install" is to symlink log-dlproc-life-973.bash
+(or more/log-dlproc-life-973.pl, informed below) to somewhere in
+$PATH, and leave cloned repository lying around.
+
+That's is how I do it.
+
+(if, someday, we wanted "out of tree" .so build,
+ then that has to be thought further...)
+
+--
+
 Currently subdirectory ./more/ has the following files:
 
 - more/log-dlproc-life-973.pl

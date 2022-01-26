@@ -8,7 +8,7 @@
 #	    All rights reserved
 #
 # Created: Sat 01 Jan 2022 22:25:10 EET too
-# Last modified: Tue 25 Jan 2022 21:05:17 +0200 too
+# Last modified: Wed 26 Jan 2022 19:23:25 +0200 too
 
 # SPDX-License-Identifier: BSD-2-Clause
 
@@ -30,9 +30,10 @@ $ENV{$1} = $2, shift while (@ARGV and $ARGV[0] =~ /(.+)=(.+)/);
 
 die "\ncommand [arg]... not given\n\n" unless @ARGV;
 
-my $ld_preload = $0; $ld_preload =~ s|/[^/]+$||;
-$ld_preload = '.' if $ld_preload eq $0;
-#$ld_preload = abs_path $ld_preload . '/../ldpreload-log-dlproc-life-973.so';
+my $ld_preload = (-l $0)? readlink $0: $0;  $ld_preload =~ s|/[^/]+$||;
+$ld_preload =~ s|/more$|/|; # XXX due to how this is currently laid in repo XXX
+$ld_preload = '..' if $ld_preload eq $0 or $ld_preload eq '.'; # XXX ditto XXX
+#$ld_preload = '.' if $ld_preload eq $0; # this instead of above if in same dir
 $ld_preload = abs_path $ld_preload . '/ldpreload-log-dlproc-life-973.so';
 
 die "\n'$ld_preload' does not exist\n",

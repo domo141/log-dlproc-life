@@ -11,7 +11,7 @@
 #	    All rights reserved
 #
 # Created: Tue 06 Oct 2015 18:36:30 EEST too
-# Last modified: Sat 08 Jan 2022 17:50:18 +0200 too
+# Last modified: Wed 26 Jan 2022 19:06:28 +0200 too
 
 # SPDX-License-Identifier: BSD-2-Clause
 
@@ -66,12 +66,18 @@ in */*)
 	case $IFS in :) die "'$1': command not found"; esac
 esac
 
-case $0 in /*) lwd=${0%/*}
-	;; */*/*) lwd=${0%/*}; lwd=`exec readlink -f "$lwd"`
-	;; ./*) lwd=$PWD
-	;; */*) lwd=${0%/*}; lwd=`exec readlink -f "$lwd"`
-	;; *) lwd=$PWD
-esac
+if test -L "$0"
+then
+	lwd=`readlink -f "$0"`
+	lwd=${lwd%/*}
+else
+	case $0 in /*) lwd=${0%/*}
+		;; */*/*) lwd=${0%/*}; lwd=`readlink -f "$lwd"`
+		;; ./*) lwd=$PWD
+		;; */*) lwd=${0%/*}; lwd=`readlink -f "$lwd"`
+		;; *) lwd=$PWD
+	esac
+fi
 
 ld_preload=$lwd/ldpreload-log-dlproc-life-973.so
 
