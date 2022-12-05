@@ -1,4 +1,7 @@
 
+log-dlproc-life
+'''''''''''''''
+
 Attempt to log start and exit information of execution of dynamically
 loadable binary executables.
 
@@ -31,6 +34,36 @@ And then execute
 to examine what got logged.
 
 --
+
+log-statopen
+''''''''''''
+
+This is quick addition to "mitigate" the problem with inotify(7) (and
+fanotify(7)) which does not (cannot) notice *stat*(2) calls. The code
+is "stripped" version of ldpreload-vsfa.so seen elsewhere -- the bash
+wrapper is almost identical to the log-dlproc-life version, so
+bringing the code here was seen like quick and easy option.
+
+To compile the code, enter:
+
+  sh ldpreload-statopen.c
+
+To try it, execute:
+
+  ./log-statopen-973.bash statopens '.' stat /dev/null
+
+And then execute
+
+  ${PAGER:-less} statopens
+
+to examine what got logged.
+
+--
+
+The rest references log-dlproc-life. log-statopen can be thought to be
+used in many of those cases, too...
+
+====
 
 Simplest way to "install" is to symlink log-dlproc-life-973.bash
 (or more/log-dlproc-life-973.pl, informed below) to somewhere in
