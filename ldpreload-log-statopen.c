@@ -13,7 +13,7 @@
  *
  * Created: Thu 14 Dec 2017 08:48:34 EET too (ldpreload-vsfa.c in ioiomxtx)
  * L.st modified: Sat 02 Apr 2022 16:51:21 +0300 too
- * Last modified: Thu 08 Dec 2022 07:26:38 +0200 too
+ * Last modified: Tue 13 Dec 2022 22:08:56 +0200 too
  */
 
 /* log some *stat*() and *open*() calls
@@ -146,7 +146,7 @@ static void pfdwrite(const char * fn, const char * fname)
     char buf[4096];
     int l;
     pid_t pid = getpid();
-    if (fname[0] == '/' || fn[0] == '/') {
+    if (fname[0] == '/') {
 	l = snprintf(buf, sizeof buf, "%d: %s: %s\n", pid, fn, fname);
     }
     else {
@@ -158,11 +158,22 @@ static void pfdwrite(const char * fn, const char * fname)
     (void)!write(973, buf, l);
 }
 
+static void pfdwrite2(const char * fn, const char * name, const char * arg1)
+{
+    char buf[4096];
+    int l;
+    pid_t pid = getpid();
+    l = snprintf(buf, sizeof buf, "%d: %s: %s %s\n", pid, fn, name, arg1);
+    if (l > (int)sizeof buf) l = (int)sizeof buf;
+    // use log-statopen-973.bash to make this fd //
+    (void)!write(973, buf, l);
+}
+
 __attribute__((constructor))
 static void fn(int argc, const char ** argv /*, unsigned char ** envp*/)
 {
     (void)argc;
-    pfdwrite("/exec/", argv[0]);
+    pfdwrite2("/exec/", argv[0], argv[1]);
 }
 
 
