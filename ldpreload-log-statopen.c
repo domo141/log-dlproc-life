@@ -13,12 +13,13 @@
  *
  * Created: Thu 14 Dec 2017 08:48:34 EET too (ldpreload-vsfa.c in ioiomxtx)
  * L.st modified: Sat 02 Apr 2022 16:51:21 +0300 too
- * Last modified: Tue 13 Dec 2022 22:08:56 +0200 too
+ * Last modified: Thu 19 Jan 2023 21:06:14 +0200 too
  */
 
 /* log some *stat*() and *open*() calls
  * -- to see which files were accessed; inotify (and fanotify)
  * \-  don't "see" stat() calls
+ * wrap close() too, often avoid closing fd 973 when called...
 */
 
 // gcc -dM -E -xc /dev/null | grep -i gnuc
@@ -106,6 +107,7 @@
 #define __lxstat __lxstat_hidden
 #define __lxstat64 __lxstat64_hidden
 #define access access_hidden
+#define close close_hidden
 
 #include <unistd.h>
 #include <stdio.h>
@@ -139,7 +141,7 @@
 #undef __lxstat
 #undef __lxstat64
 #undef access
-
+#undef close
 
 static void pfdwrite(const char * fn, const char * fname)
 {
@@ -207,6 +209,16 @@ _rt _fn _args { \
 #define cprintf(...) do {} while (0)
 #endif
 
+_deffn ( int, close, (int fd) )
+#if 0
+{
+#endif
+    // awrite(pathname); replace w/ something
+    (void)fn;
+    cprintf("*** close(%d)\n", fd);
+    if (fd == 973) return 0;
+    return close_next(fd);
+}
 
 _deffn ( int, open, (const char * pathname, int flags, mode_t mode) )
 #if 0
