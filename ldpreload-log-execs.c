@@ -14,7 +14,7 @@
  * Created: Fri 02 Oct 2015 18:47:15 +0300 too
  * L.st modified: Fri 11 Nov 2016 21:38:42 +0200 too
  * L.st modified: Tue 25 Jan 2022 19:16:29 +0200 too
- * Last modified: Thu 19 Sep 2024 20:07:13 +0300 too
+ * Last modified: Thu 19 Sep 2024 22:28:51 +0300 too
  */
 
 /* SPDX-License-Identifier: BSD-2-Clause */
@@ -712,7 +712,7 @@ _deffn ( int, execvp, (char * path, char ** const argv) )
     unsigned char * p = buf;
 
     ABUF0(" {\n"
-	  "  \"fn\": \"execv\",\n"
+	  "  \"fn\": \"execvp\",\n"
 	  "  \"pathname\": \"");
     ABUF1(sc2uc_p(path));
     ABUFC('"');
@@ -776,7 +776,7 @@ _deffn ( int, execvpe, (char * path, char ** const argv, char ** const envp) )
     unsigned char * p = buf;
 
     ABUF0(" {\n"
-	  "  \"fn\": \"execv\",\n"
+	  "  \"fn\": \"execvpe\",\n"
 	  "  \"pathname\": \"");
     ABUF1(sc2uc_p(path));
     ABUFC('"');
@@ -837,11 +837,10 @@ _deffn ( int, execvpe, (char * path, char ** const argv, char ** const envp) )
     if (! _fn##_next ) *(void**) (&_fn##_next) = dlsym_next(#_fn)
 
 
-#if 0 // untested //
 int execl (char * path, char * arg, ...);
 int execl (char * path, char * arg, ...)
 {
-    _nextfn(int, execv, (const char * pathname, char *const argv[]);
+    _nextfn( int, execv, (const char * pathname, char *const argv[]) );
 
     unsigned char buf[LBSIZE];
     unsigned char * p = buf;
@@ -849,7 +848,7 @@ int execl (char * path, char * arg, ...)
     //static_assert(((intptr_t)buf & 7) == 0);
 
     ABUF0(" {\n"
-	  "  \"fn\": \"execv\",\n"
+	  "  \"fn\": \"execl\",\n"
 	  "  \"pathname\": \"");
     ABUF1(sc2uc_p(path));
     ABUFC('"');
@@ -891,11 +890,12 @@ int execl (char * path, char * arg, ...)
     *av++ = arg;
     for (char * a = va_arg(ap, char *); a; a = va_arg(ap, char *)) {
 	*av++ = a;
-	// XXX check if fits.
+	// fixme: log (common fn?)
+	if ((unsigned char *)av - buf > CWDOFF) _exit(111);
     }
     va_end(ap);
     *av = NULL;
-    int rv = execv_next(path, av);
+    int rv = execv_next(path, (char **)buf);
 
     p = buf;
 
@@ -913,4 +913,159 @@ int execl (char * path, char * arg, ...)
 
     return rv;
 }
-#endif
+
+int execlp (char * path, char * arg, ...);
+int execlp (char * path, char * arg, ...)
+{
+    _nextfn( int, execvp, (const char * pathname, char *const argv[]) );
+
+    unsigned char buf[LBSIZE];
+    unsigned char * p = buf;
+
+    //static_assert(((intptr_t)buf & 7) == 0);
+
+    ABUF0(" {\n"
+	  "  \"fn\": \"execlp\",\n"
+	  "  \"pathname\": \"");
+    ABUF1(sc2uc_p(path));
+    ABUFC('"');
+    MAY_ADD_PID;
+    MAY_ADD_PPID;
+    MAY_ADD_TIME(time);
+    MAY_ADD_CPU(cpu);
+    MAY_ADD_PWD;
+    BB;
+    ABUF0(",\n"
+	  "  \"args\": [");
+    ABUF0("\n   ");
+    ABUFC('"');
+    ABUF1(sc2uc_p(arg));
+    ABUFC('"');
+    va_list ap;
+    va_start(ap, arg);
+    for (char * a = va_arg(ap, char *); a; a = va_arg(ap, char *)) {
+	ABUF0(",\n   \"");
+	unsigned char * pp = p;
+	ABUF1(sc2uc_p(a));
+	if (sizeof (buf) - (p - buf) < 1040) {
+	    p = pp;
+	    ABUF0("...\"");
+	    break;
+	}
+	ABUFC('"');
+    }
+    va_end(ap);
+    BE;
+    ABUF0("\n  ]");
+    EOB;
+
+    (void)!write(FD, buf, p - buf);
+
+    va_list ap;
+    va_start(ap, arg);
+    char ** av = (char **)buf;
+    *av++ = arg;
+    for (char * a = va_arg(ap, char *); a; a = va_arg(ap, char *)) {
+	*av++ = a;
+	// fixme: log (common fn?)
+	if ((unsigned char *)av - buf > CWDOFF) _exit(111);
+    }
+    va_end(ap);
+    *av = NULL;
+    int rv = execvp_next(path, (char **)buf);
+
+    p = buf;
+
+    ABUF0(" {\n"
+	  "  \"fn\": \"execlp\",\n"
+	  "  \"pathname\": \":failed:\"");
+    MAY_ADD_PID;
+    MAY_ADD_TIME(time);
+    ABUF0(",\n" "  \"errno\": ");
+    p = lutoa(p, errno);
+    MAY_ADD_CPU(cpu);  // probably always same, let's follow...
+    EOB;
+
+    (void)!write(FD, buf, p - buf);
+
+    return rv;
+}
+
+int execle (char * path, char * arg, ...);
+int execle (char * path, char * arg, ...)
+{
+    _nextfn( int, execvpe, (const char * pathname,
+			    char *const argv[], char *const envp[]) );
+
+    unsigned char buf[LBSIZE];
+    unsigned char * p = buf;
+
+    //static_assert(((intptr_t)buf & 7) == 0);
+
+    ABUF0(" {\n"
+	  "  \"fn\": \"execle\",\n"
+	  "  \"pathname\": \"");
+    ABUF1(sc2uc_p(path));
+    ABUFC('"');
+    MAY_ADD_PID;
+    MAY_ADD_PPID;
+    MAY_ADD_TIME(time);
+    MAY_ADD_CPU(cpu);
+    MAY_ADD_PWD;
+    BB;
+    ABUF0(",\n"
+	  "  \"args\": [");
+    ABUF0("\n   ");
+    ABUFC('"');
+    ABUF1(sc2uc_p(arg));
+    ABUFC('"');
+    va_list ap;
+    va_start(ap, arg);
+    for (char * a = va_arg(ap, char *); a; a = va_arg(ap, char *)) {
+	ABUF0(",\n   \"");
+	unsigned char * pp = p;
+	ABUF1(sc2uc_p(a));
+	if (sizeof (buf) - (p - buf) < 1040) {
+	    p = pp;
+	    ABUF0("...\"");
+	    break;
+	}
+	ABUFC('"');
+    }
+    va_end(ap);
+    BE;
+    ABUF0("\n  ]");
+    EOB;
+
+    (void)!write(FD, buf, p - buf);
+
+    va_list ap;
+    va_start(ap, arg);
+    char ** av = (char **)buf;
+    *av++ = arg;
+    for (char * a = va_arg(ap, char *); a; a = va_arg(ap, char *)) {
+	*av++ = a;
+	// fixme: log (common fn?)
+	if ((unsigned char *)av - buf > CWDOFF) _exit(111);
+    }
+    char * const * envp = va_arg(ap, char * const *);
+    va_end(ap);
+    *av = NULL;
+    int rv = execvpe_next(path, (char **)buf, envp);
+
+    p = buf;
+
+    ABUF0(" {\n"
+	  "  \"fn\": \"execle\",\n"
+	  "  \"pathname\": \":failed:\"");
+    MAY_ADD_PID;
+    MAY_ADD_TIME(time);
+    ABUF0(",\n" "  \"errno\": ");
+    p = lutoa(p, errno);
+    MAY_ADD_CPU(cpu);  // probably always same, let's follow...
+    EOB;
+
+    (void)!write(FD, buf, p - buf);
+
+    return rv;
+}
