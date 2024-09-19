@@ -1,6 +1,6 @@
 #if 0 /* -*- mode: c; c-file-style: "stroustrup"; tab-width: 8; -*-
  set -euf
- trg=${0##*''/}; trg=${trg%.c}-973.so; test ! -e "$trg" || rm "$trg"
+ trg=${0##*''/}; trg=${trg%.c}-974.so; test ! -e "$trg" || rm "$trg"
  case ${1-} in '') set x -O2; shift; esac
  #case ${1-} in '') set x -ggdb; shift; esac
  x_exec () { printf %s\\n "$*" >&2; exec "$@"; }
@@ -13,13 +13,13 @@
  *
  * Created: Thu 14 Dec 2017 08:48:34 EET too (ldpreload-vsfa.c in ioiomxtx)
  * L.st modified: Sat 02 Apr 2022 16:51:21 +0300 too
- * Last modified: Thu 19 Jan 2023 21:06:14 +0200 too
+ * Last modified: Thu 19 Sep 2024 19:56:15 +0300 too
  */
 
 /* log some *stat*() and *open*() calls
  * -- to see which files were accessed; inotify (and fanotify)
  * \-  don't "see" stat() calls
- * wrap close() too, often avoid closing fd 973 when called...
+ * wrap close() too, often avoid closing fd 974 when called...
 */
 
 // gcc -dM -E -xc /dev/null | grep -i gnuc
@@ -156,8 +156,8 @@ static void pfdwrite(const char * fn, const char * fname)
 	l = snprintf(buf, sizeof buf, "%d: %s: %s/%s\n", pid, fn, p, fname);
     }
     if (l > (int)sizeof buf) l = (int)sizeof buf;
-    // use log-statopen-973.bash to make this fd //
-    (void)!write(973, buf, l);
+    // use log-statopen-974.bash to make this fd //
+    (void)!write(974, buf, l);
 }
 
 static void pfdwrite2(const char * fn, const char * name, const char * arg1)
@@ -167,8 +167,8 @@ static void pfdwrite2(const char * fn, const char * name, const char * arg1)
     pid_t pid = getpid();
     l = snprintf(buf, sizeof buf, "%d: %s: %s %s\n", pid, fn, name, arg1);
     if (l > (int)sizeof buf) l = (int)sizeof buf;
-    // use log-statopen-973.bash to make this fd //
-    (void)!write(973, buf, l);
+    // use log-statopen-974.bash to make this fd //
+    (void)!write(974, buf, l);
 }
 
 __attribute__((constructor))
@@ -216,7 +216,7 @@ _deffn ( int, close, (int fd) )
     // awrite(pathname); replace w/ something
     (void)fn;
     cprintf("*** close(%d)\n", fd);
-    if (fd == 973) return 0;
+    if (fd == 974) return 0;
     return close_next(fd);
 }
 

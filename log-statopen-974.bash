@@ -2,7 +2,7 @@
 # -*- mode: shell-script; sh-basic-offset: 8; tab-width: 8 -*-
 # $ log-statopen.bash $
 #
-# This is bash script as bash can do  exec 973>"$logfile"
+# This is bash script as bash can do  exec 974>"$logfile"
 # (perl, python, ruby, ..., c would be next options...)
 #
 # Author: Tomi Ollila -- too ät iki piste fi
@@ -12,7 +12,7 @@
 #
 # Created: Wed 26 Jan 2022 19:06:28 +0200 too
 # L.st modified: Mon 05 Dec 2022 18:31:13 +0200 too
-# Last modified: Mon 05 Dec 2022 20:48:16 +0200 too
+# Last modified: Thu 19 Sep 2024 20:09:03 +0300 too
 
 # SPDX-License-Identifier: BSD-2-Clause
 
@@ -80,18 +80,18 @@ else
 	esac
 fi
 
-ld_preload=$lwd/ldpreload-log-statopen-973.so
+ld_preload=$lwd/ldpreload-log-statopen-974.so
 
 test -f "$ld_preload" || die "'$ld_preload' does not exist" '' \
-	"Execute  sh ldpreload-log-dlproc-life.c 973  to create it"
+	"Execute  sh ldpreload-log-statopen.c  to create it"
 
 case $logfile
-	in [0-9])  exec 973>&$1
-	;; *)	   exec 973>"$logfile"
+	in [0-9])  exec 974>&$1
+	;; *)	   exec 974>"$logfile"
 esac
 
-#st='strace -o ttt'
 st=
+#st='strace -o ttt'
 
 $setx
 #exec /usr/bin/env -i "LD_PRELOAD=$ld_preload${LD_PRELOAD:+:$LD_PRELOAD}" \

@@ -1,17 +1,19 @@
 #!/bin/bash
 # -*- mode: shell-script; sh-basic-offset: 8; tab-width: 8 -*-
-# $ log-dlproc-life.bash $
+# $ log-execs.bash $
 #
-# This is bash script as bash can do  exec 973>"$logfile"
+# This is bash script as bash can do  exec 975>"$logfile"
 # (perl, python, ruby, ..., c would be next options...)
 #
 # Author: Tomi Ollila -- too ät iki piste fi
 #
-#	Copyright (c) 2015 Tomi Ollila
+#	Copyright (c) 2022 Tomi Ollila
 #	    All rights reserved
 #
-# Created: Tue 06 Oct 2015 18:36:30 EEST too
-# Last modified: Thu 19 Sep 2024 20:08:54 +0300 too
+# Created: Wed 26 Jan 2022 19:06:28 +0200 too
+# L.st modified: Mon 05 Dec 2022 18:31:13 +0200 too
+# L.st modified: Mon 05 Dec 2022 20:48:16 +0200 too
+# Last modified: Thu 19 Sep 2024 20:08:59 +0300 too
 
 # SPDX-License-Identifier: BSD-2-Clause
 
@@ -28,7 +30,7 @@ case ${1-} in -x) setx='set -x'; shift ;; *) setx= ;; esac
 if test $# -lt 3
 then	exec >&2; case $0 in /*) b0=${0##*/} ;; *) b0=$0 ;; esac
 	echo
-	echo Usage: "$b0 [-x] LOGFILE_PFX '.' [NAME=VALUE]... [COMMAND [ARG]...]"
+	echo Usage: "$b0 [-x] LOGFILE '.' [NAME=VALUE]... [COMMAND [ARG]...]"
 	echo
 	exit 1
 fi
@@ -79,19 +81,19 @@ else
 	esac
 fi
 
-ld_preload=$lwd/ldpreload-log-dlproc-life-973.so
+ld_preload=$lwd/ldpreload-log-execs-975.so
 
 test -f "$ld_preload" || die "'$ld_preload' does not exist" '' \
-	"Execute  sh ldpreload-log-dlproc-life.c 973  to create it"
+	"Execute  sh ldpreload-log-execs.c 975  to create it"
 
 case $logfile
-	in [0-9])  exec 973>&$1
-	;; *.js0n) exec 973>"$logfile"
-	;; *.)	   exec 973>"$logfile"js0n
-	;; *)	   exec 973>"$logfile".js0n
+	in [0-9])  exec 975>&$1
+	;; *.js0n) exec 975>"$logfile"
+	;; *.)	   exec 975>"$logfile"js0n
+	;; *)	   exec 975>"$logfile".js0n
 esac
 
-st=
+st=/usr/bin/env
 #st='strace -o ttt'
 
 $setx
