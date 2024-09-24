@@ -1,27 +1,27 @@
-#if 0 /*
- bn=${0##*''/}; bn=${bn%.c} # instead of bn=`basename "$0" .c`
- case ${1-} in	( [0-9] | [1-9]*[0-9] ) fd=$(($1 + 0)) ;; # OK
-		( * ) echo "to compile: sh $0 {fd}" >&2; exit 1 ;; esac
- so=$bn-$fd.so
- set -xeuf
- test -f $so && rm $so
- gcc -O2 -std=c99 -shared -fPIC -s -o $so "$0" -DFD=$fd -ldl
+#if 0 /* -*- mode: c; c-file-style: "stroustrup"; tab-width: 8; -*-
+ set -euf
+ case ${1-} in --fd=*) fd=$((${1#*=} + 0)); shift ;; *) fd=975
+ esac
+ so=${0##*''/}; so=${so%.c}-$fd.so; test -e "$so" && rm "$so"
+ test $# = 0 && set -- -O2
+ set -x
+ ${CC:-gcc} -std=c11 -shared -fPIC -o "$so" "$0" "$@" -DFD=$fd -ldl
  exec chmod 644 $so
- exit
-*/
+ exit not reached
+ */
 #endif
 /*
  * Created: Fri 02 Oct 2015 18:47:15 +0300 too
  * L.st modified: Fri 11 Nov 2016 21:38:42 +0200 too
  * L.st modified: Tue 25 Jan 2022 19:16:29 +0200 too
- * Last modified: Thu 19 Sep 2024 22:28:51 +0300 too
+ * Last modified: Tue 24 Sep 2024 17:40:35 +0300 too
  */
 
 /* SPDX-License-Identifier: BSD-2-Clause */
 
 /* Nice test:
- *  $ sh ldpreload-log-execs.c 1
- *  $ env -i LD_PRELOAD=./ldpreload-log-execs.so env env env true
+ *  $ sh ldpreload-log-execs.c --fd=1
+ *  $ env -i LD_PRELOAD=./ldpreload-log-execs-1.so env env env true
  *
  * add LD_DEBUG=all to above to see what calls were not seen...
  * (first time it was useful to notice that wait3() was needed...)
