@@ -14,7 +14,8 @@
  * Created: Fri 02 Oct 2015 18:47:15 +0300 too
  * L.st modified: Fri 11 Nov 2016 21:38:42 +0200 too
  * L.st modified: Tue 25 Jan 2022 19:16:29 +0200 too
- * Last modified: Tue 24 Sep 2024 17:40:35 +0300 too
+ * L.st modified: Tue 24 Sep 2024 17:40:35 +0300 too
+ * Last modified: Sun 28 Jun 2026 23:05:06 +0300 too
  */
 
 /* SPDX-License-Identifier: BSD-2-Clause */
@@ -180,6 +181,16 @@
 #define static_assert(x) _Static_assert(x, #x)
 #endif
 
+#if defined (__GNUC__) && __GNUC__ > 12
+#define _nonstring_ __attribute__((nonstring))
+#else
+#if defined __has_attribute && __has_attribute((nonstring))
+#define _nonstring_ __attribute__((nonstring))
+#else
+#define _nonstring_
+#endif
+#endif
+
 #if 0
 // could be used to increase precision of nanosecond-resolution timestamps
 // when loaded from json to system native formats. usually the overhead of
@@ -237,7 +248,7 @@ always_inline unsigned char * lutoa(unsigned char * p, unsigned long u)
     return r;
 }
 
-static const char hex[16] = "0123456789abcdef"; // without trailing '\0'
+static const char _nonstring_ hex[16] = "0123456789abcdef";
 
 static void abufs(unsigned char ** pp, int l, const unsigned char * s)
 {
