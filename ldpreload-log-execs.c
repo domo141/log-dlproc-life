@@ -15,7 +15,7 @@
  * L.st modified: Fri 11 Nov 2016 21:38:42 +0200 too
  * L.st modified: Tue 25 Jan 2022 19:16:29 +0200 too
  * L.st modified: Tue 24 Sep 2024 17:40:35 +0300 too
- * Last modified: Sun 28 Jun 2026 23:05:06 +0300 too
+ * Last modified: Mon 29 Jun 2026 13:24:41 +0300 too
  */
 
 /* SPDX-License-Identifier: BSD-2-Clause */
@@ -184,7 +184,7 @@
 #if defined (__GNUC__) && __GNUC__ > 12
 #define _nonstring_ __attribute__((nonstring))
 #else
-#if defined __has_attribute && __has_attribute((nonstring))
+#if defined __has_attribute && __has_attribute(nonstring)
 #define _nonstring_ __attribute__((nonstring))
 #else
 #define _nonstring_
